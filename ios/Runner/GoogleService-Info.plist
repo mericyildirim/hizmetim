@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>200555773340-s97lcj2mk0ga80bmbt92hfb1i4k6rbdp.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.200555773340-s97lcj2mk0ga80bmbt92hfb1i4k6rbdp</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAyGNTLqOr2iEFL49aCSf6RaF2SiAOX43U</string>
+	<key>GCM_SENDER_ID</key>
+	<string>200555773340</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.hizmetim</string>
+	<key>PROJECT_ID</key>
+	<string>hizmetim-168bc</string>
+	<key>STORAGE_BUCKET</key>
+	<string>hizmetim-168bc.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:200555773340:ios:d61a367ffaa68e0d649c59</string>
+</dict>
+</plist>

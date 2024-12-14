@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "200555773340",
+    "project_id": "hizmetim-168bc",
+    "storage_bucket": "hizmetim-168bc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:200555773340:android:52174d012f959e12649c59",
+        "android_client_info": {
+          "package_name": "com.example.hizmetim"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "200555773340-r9vl6guosc0abmvg1rob88r0iccq4cca.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hizmetim",
+            "certificate_hash": "2d5eae5014ee347ca0078dfc6b9156339ba1c7a6"
+          }
+        },
+        {
+          "client_id": "200555773340-30hbjomks5667g5mv8oa1a1rl9i4ji7r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8Ehj9_mqNDMjLjVsT--0Qs58lcpyrKkw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "200555773340-30hbjomks5667g5mv8oa1a1rl9i4ji7r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "200555773340-s97lcj2mk0ga80bmbt92hfb1i4k6rbdp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.hizmetim"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

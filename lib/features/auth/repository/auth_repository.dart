@@ -10,22 +10,17 @@ import 'package:hizmetim/core/providers/firebase_provider.dart';
 import 'package:hizmetim/core/type_defs.dart';
 import 'package:hizmetim/models/user_model.dart';
 
-/// `authRepositoryProvider`, `AuthRepository` sınıfının bir örneğini sağlayan bir Provider'dır.
-/// Bu sınıf, Firestore, FirebaseAuth ve GoogleSignIn bağımlılıklarını alır.
 final authRepositoryProvider = Provider((ref) => AuthRepository(
       firestore: ref.read(firestoreProvider),
       auth: ref.read(authProvider),
       googleSignIn: ref.read(googleSignInProvider),
     ));
 
-/// `AuthRepository` sınıfı, kullanıcı kimlik doğrulama işlemlerini yönetir.
-/// Firestore, FirebaseAuth ve GoogleSignIn bağımlılıklarını alır.
 class AuthRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
 
-  /// `AuthRepository` yapıcı metodu, Firestore, FirebaseAuth ve GoogleSignIn bağımlılıklarını alır.
   AuthRepository({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
@@ -34,7 +29,6 @@ class AuthRepository {
         _auth = auth,
         _googleSignIn = googleSignIn;
 
-  /// `_users`, Firestore'daki kullanıcılar koleksiyonuna referans sağlar.
   CollectionReference get _users =>
       _firestore.collection(FirebaseConstants.usersCollection);
 
@@ -78,77 +72,43 @@ class AuthRepository {
     }
   }
 
-  FutureEither<void> signUpWithEmail(
+  FutureEither<UserModel> signUpWithEmailAndPassword(
       String email, String password, String name) async {
     try {
-      // Kullanıcıyı e-posta ve şifre ile Firebase'e kaydet
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // E-posta doğrulama bağlantısını gönder
-      await userCredential.user!.sendEmailVerification();
-
-      // Yeni kullanıcı için UserModel oluştur
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
       UserModel userModel = UserModel(
         name: name,
-        profilePic: Constants.avatarDefault,
+        profilePic: userCredential.user!.photoURL ?? Constants.avatarDefault,
         banner: Constants.bannerDefault,
         uid: userCredential.user!.uid,
-        isAuthenticated: false, // Kullanıcı henüz doğrulanmadı
+        isAuthenticated: true,
         balance: 0,
         awards: [],
       );
-
-      // Kullanıcı verilerini Firestore'a kaydet
       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
-
-      // Kullanıcının oturumunu kapat
-      await _auth.signOut();
-
-      return right(null); // Başarılı
+      return right(userModel);
     } on FirebaseAuthException catch (e) {
-      return left(Failure(e.message ?? 'Bir hata oluştu'));
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
   }
 
-  FutureEither<UserModel> signInWithEmail(String email, String password) async {
+  FutureEither<UserModel> signInWithEmailAndPassword(
+      String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      User user = userCredential.user!;
-      await user.reload(); // Kullanıcı bilgilerini güncelle
-
-      if (user.emailVerified) {
-        // `isAuthenticated` değerini Firestore'da güncelle
-        await _users.doc(user.uid).update({
-          'isAuthenticated': true,
-        });
-
-        // Kullanıcı modelini al
-        UserModel userModel = await getUserData(user.uid).first;
-        return right(userModel);
-      } else {
-        // E-posta doğrulanmadıysa, oturumu kapat
-        await _auth.signOut();
-        return left(Failure('Lütfen e-posta adresinizi doğrulayın.'));
-      }
+          email: email, password: password);
+      UserModel userModel = await getUserData(userCredential.user!.uid).first;
+      return right(userModel);
     } on FirebaseAuthException catch (e) {
-      return left(Failure(e.message ?? 'Bir hata oluştu'));
+      return left(Failure(e.message!));
     } catch (e) {
       return left(Failure(e.toString()));
     }
   }
 
-  /// `getUserData`, belirli bir kullanıcı kimliğine sahip kullanıcının verilerini alır.
-  /// Kullanıcı verilerini bir akış olarak döner.
   Stream<UserModel> getUserData(String uid) {
     return _users.doc(uid).snapshots().map(
         (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));

@@ -31,7 +31,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = ref.watch(authControllerProvider); // Yüklenme durumu
+    final isLoading = ref.watch(authControllerProvider);
     return Scaffold(
       appBar: AppBar(
         title: Image.asset(
@@ -51,7 +51,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         ],
       ),
       body: isLoading
-          ? const Loader() // Yükleniyorsa loader göster
+          ? const Loader()
           : Padding(
               padding: const EdgeInsets.all(15.0),
               child: Form(
@@ -84,16 +84,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     AuthGradientButton(
                       buttonText: 'Sign Up',
                       onTap: () {
-                        // Form doğrulama
                         if (formKey.currentState!.validate()) {
                           final email = emailController.text.trim();
                           final password = passwordController.text.trim();
                           final name = nameController.text.trim();
 
-                          // AuthController üzerinden kayıt olma işlemini çağır
                           ref
                               .read(authControllerProvider.notifier)
-                              .signUpWithEmail(context, email, password, name);
+                              .signUpWithEmailAndPassword(
+                                  context, email, password, name);
                         }
                       },
                     ),

@@ -81,10 +81,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         final password = passwordController.text.trim();
 
                         if (formKey.currentState!.validate()) {
-                          // AuthController üzerinden giriş işlemini yap
                           ref
                               .read(authControllerProvider.notifier)
-                              .signInWithEmail(context, email, password);
+                              .signInWithEmailAndPassword(
+                                  context, email, password);
                         }
                       },
                     ),

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -34,12 +36,15 @@ class _MyAppState extends ConsumerState<MyApp> {
   UserModel? userModel;
 
   void getData(WidgetRef ref, User data) async {
-    userModel = await ref
-        .watch(authControllerProvider.notifier)
-        .getUserData(data.uid)
-        .first;
-    ref.read(userProvider.notifier).update((state) => userModel);
-    setState(() {});
+    if (userModel == null) {
+      userModel = await ref
+          .watch(authControllerProvider.notifier)
+          .getUserData(data.uid)
+          .first;
+      ref.read(userProvider.notifier).update((state) => userModel);
+      log('deneme');
+      setState(() {});
+    }
   }
 
   @override
@@ -51,7 +56,7 @@ class _MyAppState extends ConsumerState<MyApp> {
               theme: Pallete.lightModeAppTheme,
               routerDelegate: RoutemasterDelegate(
                 routesBuilder: (context) {
-                  if (data != null && data.emailVerified) {
+                  if (data != null) {
                     getData(ref, data);
                     if (userModel != null) {
                       return loggedInRoute;

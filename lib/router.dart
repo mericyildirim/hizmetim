@@ -5,8 +5,8 @@ import 'package:hizmetim/features/auth/screens/signup_screen.dart';
 import 'package:routemaster/routemaster.dart';
 
 final loggedOutRoute = RouteMap(routes: {
-  '/': (_) => const MaterialPage(child: SignupScreen()),
-  '/login': (_) => const MaterialPage(child: LoginScreen()),
+  '/': (_) => const MaterialPage(child: LoginScreen()),
+  '/signup': (_) => const MaterialPage(child: SignupScreen()),
 });
 
 final loggedInRoute = RouteMap(routes: {

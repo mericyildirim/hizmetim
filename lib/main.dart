@@ -34,40 +34,66 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   UserModel? userModel;
+  late Future<void> userFuture;
 
-  void getData(WidgetRef ref, User data) async {
-    if (userModel == null) {
+  // Kullanıcı verisini almak için async fonksiyon
+  Future<void> getData(WidgetRef ref, User? data) async {
+    if (data != null && userModel == null) {
       userModel = await ref
           .watch(authControllerProvider.notifier)
           .getUserData(data.uid)
           .first;
       ref.read(userProvider.notifier).update((state) => userModel);
       log('deneme');
-      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return ref.watch(authStateChangesProvider).when(
-        data: (data) => MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-              title: 'Hizmetim',
-              theme: Pallete.lightModeAppTheme,
-              routerDelegate: RoutemasterDelegate(
-                routesBuilder: (context) {
-                  if (data != null) {
-                    getData(ref, data);
-                    if (userModel != null) {
-                      return loggedInRoute;
-                    }
-                  }
-                  return loggedOutRoute;
-                },
-              ),
-              routeInformationParser: const RoutemasterParser(),
-            ),
-        error: (error, stackTrace) => ErrorText(error: error.toString()),
-        loading: () => const Loader());
+          data: (data) {
+            // Eğer data null değilse veriyi al
+            if (userModel == null) {
+              userFuture =
+                  getData(ref, data); // data burada nullable User? olabilir
+            } else {
+              // userModel varsa, userFuture'ı geçerli yap
+              userFuture = Future.value();
+            }
+
+            return FutureBuilder<void>(
+              future: userFuture,
+              builder: (context, snapshot) {
+                // Eğer veri alınıyor veya hata varsa bir bekleme durumu göster
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Loader();
+                }
+
+                if (snapshot.hasError) {
+                  return ErrorText(error: snapshot.error.toString());
+                }
+
+                return MaterialApp.router(
+                  debugShowCheckedModeBanner: false,
+                  title: 'Hizmetim',
+                  theme: Pallete.lightModeAppTheme,
+                  routerDelegate: RoutemasterDelegate(
+                    routesBuilder: (context) {
+                      if (data != null) {
+                        if (userModel != null) {
+                          return loggedInRoute;
+                        }
+                      }
+                      return loggedOutRoute;
+                    },
+                  ),
+                  routeInformationParser: const RoutemasterParser(),
+                );
+              },
+            );
+          },
+          error: (error, stackTrace) => ErrorText(error: error.toString()),
+          loading: () => const Loader(),
+        );
   }
 }

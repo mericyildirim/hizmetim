@@ -3,27 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/utils.dart';
 import 'package:hizmetim/features/auth/repository/auth_repository.dart';
+import 'package:hizmetim/features/auth/repository/secure_storage_service.dart';
 import 'package:hizmetim/models/user_model.dart';
-import 'package:routemaster/routemaster.dart';
 
 // Kullanıcı modelini tutan bir StateProvider
 final userProvider = StateProvider<UserModel?>((ref) => null);
 
 // AuthController'ı sağlayan bir StateNotifierProvider
-final authControllerProvider =
-    StateNotifierProvider<AuthController, bool>((ref) => AuthController(
-          authRepository: ref.watch(authRepositoryProvider),
-          ref: ref,
-        ));
+final authControllerProvider = StateNotifierProvider<AuthController, bool>((ref) => AuthController(
+      authRepository: ref.watch(authRepositoryProvider),
+      ref: ref,
+    ));
 
 final authStateChangesProvider = StreamProvider<User?>((ref) {
   final authController = ref.watch(authControllerProvider.notifier);
   return authController.authStateChanges;
-});
-
-final getUserDataProvider = FutureProvider.family((ref, String uid) {
-  final authController = ref.watch(authControllerProvider.notifier);
-  return authController.getUserData(uid);
 });
 
 // Auth işlemlerini yöneten AuthController sınıfı
@@ -41,18 +35,15 @@ class AuthController extends StateNotifier<bool> {
   // Google ile giriş yapma fonksiyonu
   void signInWithGoogle(BuildContext context) async {
     state = true; // Yükleniyor durumunu true yap
-    final user =
-        await _authRepository.signInWithGoogle(); // Google ile giriş yap
+    final user = await _authRepository.signInWithGoogle(); // Google ile giriş yap
     state = false; // Yükleniyor durumunu false yap
     user.fold(
         (l) => showSnackBar(context, l.message), // Hata durumunda mesaj göster
-        (userModel) => _ref.read(userProvider.notifier).update(
-            (state) => userModel)); // Başarılı durumda kullanıcıyı güncelle
+        (userModel) => _ref.read(userProvider.notifier).update((state) => userModel)); // Başarılı durumda kullanıcıyı güncelle
   }
 
   // Email ve şifre ile kayıt olma fonksiyonu
-  void signUpWithEmail(
-      BuildContext context, String email, String password, String name) async {
+  void signUpWithEmail(BuildContext context, String email, String password, String name) async {
     state = true; // Yükleniyor durumunu true yap
     final result = await _authRepository.signUpWithEmail(email, password, name);
     state = false; // Yükleniyor durumunu false yap
@@ -78,8 +69,7 @@ class AuthController extends StateNotifier<bool> {
     );
   }
 
-  void signInWithEmail(
-      BuildContext context, String email, String password) async {
+  void signInWithEmail(BuildContext context, String email, String password) async {
     state = true; // Yükleniyor durumunu true yap
     final user = await _authRepository.signInWithEmail(email, password);
     state = false; // Yükleniyor durumunu false yap
@@ -95,6 +85,10 @@ class AuthController extends StateNotifier<bool> {
         if (mounted) {
           if (userModel.isAuthenticated) {
             _ref.read(userProvider.notifier).state = userModel;
+            var secureStorageService = _ref.read(secureStorageProvider);
+            secureStorageService.mailKaydet(email);
+            secureStorageService.passwordKaydet(password);
+
             // HomeScreen'e yönlendir
             Routemaster.of(context).push('/');
           } else {
@@ -106,11 +100,27 @@ class AuthController extends StateNotifier<bool> {
     );
   }
 
+  Future<void> loginWithSecureStorage(BuildContext context) async {
+    var secureStorageService = _ref.read(secureStorageProvider);
+
+    String? email = await secureStorageService.mailGetir();
+    String? password = await secureStorageService.passwordGetir();
+    if (email != null && password != null) {
+      signInWithEmail(context, email, password);
+    } else {
+      return;
+    }
+  }
+
   Stream<UserModel> getUserData(String uid) {
     return _authRepository.getUserData(uid);
   }
 
   void logout() {
     _authRepository.logOut();
+    var secureStorageService = _ref.read(secureStorageProvider);
+    secureStorageService.mailKaydet(null);
+    secureStorageService.passwordKaydet(null);
+    _ref.read(userProvider.notifier).state = null;
   }
 }

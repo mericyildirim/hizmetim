@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/common/auth_gradient_button.dart';
@@ -6,7 +8,6 @@ import 'package:hizmetim/core/common/loader.dart';
 import 'package:hizmetim/core/common/sign_in_google_button.dart';
 import 'package:hizmetim/core/constants/constants.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
-import 'package:routemaster/routemaster.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -27,6 +28,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  void signUpUser(String email, String password, String name) {
+    ref.read(authControllerProvider.notifier).signUpWithEmail(context, email, password, name);
   }
 
   @override
@@ -68,39 +73,25 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    CustomField(
-                        hintText: 'Name',
-                        controller: nameController,
-                        isObscureText: false),
+                    CustomField(hintText: 'Name', controller: nameController, isObscureText: false),
                     const SizedBox(height: 15),
-                    CustomField(
-                        hintText: 'E-mail', controller: emailController),
+                    CustomField(hintText: 'E-mail', controller: emailController),
                     const SizedBox(height: 15),
-                    CustomField(
-                        hintText: 'Password',
-                        controller: passwordController,
-                        isObscureText: true),
+                    CustomField(hintText: 'Password', controller: passwordController, isObscureText: true),
                     const SizedBox(height: 15),
                     AuthGradientButton(
                       buttonText: 'Sign Up',
                       onTap: () {
                         // Form doğrulama
                         if (formKey.currentState!.validate()) {
-                          final email = emailController.text.trim();
-                          final password = passwordController.text.trim();
-                          final name = nameController.text.trim();
-
-                          // AuthController üzerinden kayıt olma işlemini çağır
-                          ref
-                              .read(authControllerProvider.notifier)
-                              .signUpWithEmail(context, email, password, name);
+                          signUpUser(emailController.text.trim(), passwordController.text.trim(), nameController.text.trim());
                         }
                       },
                     ),
                     const SizedBox(height: 15),
                     TextButton(
                       onPressed: () {
-                        Routemaster.of(context).push('/login');
+                        
                       },
                       child: const Text('Already have an account? Sign In'),
                     ),

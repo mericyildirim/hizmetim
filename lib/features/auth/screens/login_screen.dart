@@ -6,7 +6,6 @@ import 'package:hizmetim/core/common/loader.dart';
 import 'package:hizmetim/core/common/sign_in_google_button.dart';
 import 'package:hizmetim/core/constants/constants.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
-import 'package:routemaster/routemaster.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

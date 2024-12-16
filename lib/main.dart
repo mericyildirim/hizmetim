@@ -1,16 +1,23 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hizmetim/core/common/error_text.dart';
-import 'package:hizmetim/core/common/loader.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
+import 'package:hizmetim/features/auth/screens/signup_screen.dart';
+import 'package:hizmetim/features/home/screens/home_screen.dart';
 import 'package:hizmetim/firebase_options.dart';
 import 'package:hizmetim/models/user_model.dart';
 import 'package:hizmetim/router.dart';
 import 'package:hizmetim/theme/palette.dart';
 import 'package:routemaster/routemaster.dart';
 
+final isLoggedInProvider = StateProvider<bool>((ref) {
+  var user = ref.watch(userProvider);
+  if (user != null) {
+    return true;
+  } else {
+    return false;
+  }
+});
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -33,36 +40,21 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   UserModel? userModel;
 
-  void getData(WidgetRef ref, User data) async {
-    userModel = await ref
-        .watch(authControllerProvider.notifier)
-        .getUserData(data.uid)
-        .first;
-    ref.read(userProvider.notifier).update((state) => userModel);
-    setState(() {});
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authControllerProvider.notifier).loginWithSecureStorage(context);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ref.watch(authStateChangesProvider).when(
-        data: (data) => MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-              title: 'Hizmetim',
-              theme: Pallete.lightModeAppTheme,
-              routerDelegate: RoutemasterDelegate(
-                routesBuilder: (context) {
-                  if (data != null && data.emailVerified) {
-                    getData(ref, data);
-                    if (userModel != null) {
-                      return loggedInRoute;
-                    }
-                  }
-                  return loggedOutRoute;
-                },
-              ),
-              routeInformationParser: const RoutemasterParser(),
-            ),
-        error: (error, stackTrace) => ErrorText(error: error.toString()),
-        loading: () => const Loader());
+    bool isLoggedIn = ref.watch(isLoggedInProvider);
+
+    return MaterialApp(debugShowCheckedModeBanner: false, title: 'Hizmetim', theme: Pallete.lightModeAppTheme, home: isLoggedIn ? const HomeScreen() : const SignupScreen());
   }
 }
+
+List<Widget> route1 = [];
+List<Widget> route2 = [];

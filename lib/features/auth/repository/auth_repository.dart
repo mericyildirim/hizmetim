@@ -35,8 +35,7 @@ class AuthRepository {
         _googleSignIn = googleSignIn;
 
   /// `_users`, Firestore'daki kullanıcılar koleksiyonuna referans sağlar.
-  CollectionReference get _users =>
-      _firestore.collection(FirebaseConstants.usersCollection);
+  CollectionReference get _users => _firestore.collection(FirebaseConstants.usersCollection);
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
@@ -51,8 +50,7 @@ class AuthRepository {
         idToken: googleAuth?.idToken,
       );
 
-      UserCredential userCredential =
-          await _auth.signInWithCredential(credential);
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
 
       UserModel userModel;
 
@@ -78,12 +76,10 @@ class AuthRepository {
     }
   }
 
-  FutureEither<void> signUpWithEmail(
-      String email, String password, String name) async {
+  FutureEither<void> signUpWithEmail(String email, String password, String name) async {
     try {
       // Kullanıcıyı e-posta ve şifre ile Firebase'e kaydet
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -116,6 +112,7 @@ class AuthRepository {
     }
   }
 
+// filepath: /Applications/GitHub Projects/hizmetim/lib/features/auth/repository/auth_repository.dart
   FutureEither<UserModel> signInWithEmail(String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -124,19 +121,20 @@ class AuthRepository {
       );
 
       User user = userCredential.user!;
-      await user.reload(); // Kullanıcı bilgilerini güncelle
+      await user.reload();
 
       if (user.emailVerified) {
-        // `isAuthenticated` değerini Firestore'da güncelle
         await _users.doc(user.uid).update({
           'isAuthenticated': true,
         });
 
-        // Kullanıcı modelini al
+        // Notify listeners or update authentication state here
+        // For example:
+        // authProvider.updateAuthState(true);
+
         UserModel userModel = await getUserData(user.uid).first;
         return right(userModel);
       } else {
-        // E-posta doğrulanmadıysa, oturumu kapat
         await _auth.signOut();
         return left(Failure('Lütfen e-posta adresinizi doğrulayın.'));
       }
@@ -150,8 +148,7 @@ class AuthRepository {
   /// `getUserData`, belirli bir kullanıcı kimliğine sahip kullanıcının verilerini alır.
   /// Kullanıcı verilerini bir akış olarak döner.
   Stream<UserModel> getUserData(String uid) {
-    return _users.doc(uid).snapshots().map(
-        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
+    return _users.doc(uid).snapshots().map((event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
   }
 
   void logOut() async {

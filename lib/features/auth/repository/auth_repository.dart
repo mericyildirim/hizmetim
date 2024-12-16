@@ -10,22 +10,17 @@ import 'package:hizmetim/core/providers/firebase_provider.dart';
 import 'package:hizmetim/core/type_defs.dart';
 import 'package:hizmetim/models/user_model.dart';
 
-/// `authRepositoryProvider`, `AuthRepository` sınıfının bir örneğini sağlayan bir Provider'dır.
-/// Bu sınıf, Firestore, FirebaseAuth ve GoogleSignIn bağımlılıklarını alır.
 final authRepositoryProvider = Provider((ref) => AuthRepository(
       firestore: ref.read(firestoreProvider),
       auth: ref.read(authProvider),
       googleSignIn: ref.read(googleSignInProvider),
     ));
 
-/// `AuthRepository` sınıfı, kullanıcı kimlik doğrulama işlemlerini yönetir.
-/// Firestore, FirebaseAuth ve GoogleSignIn bağımlılıklarını alır.
 class AuthRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
 
-  /// `AuthRepository` yapıcı metodu, Firestore, FirebaseAuth ve GoogleSignIn bağımlılıklarını alır.
   AuthRepository({
     required FirebaseFirestore firestore,
     required FirebaseAuth auth,
@@ -34,8 +29,8 @@ class AuthRepository {
         _auth = auth,
         _googleSignIn = googleSignIn;
 
-  /// `_users`, Firestore'daki kullanıcılar koleksiyonuna referans sağlar.
-  CollectionReference get _users => _firestore.collection(FirebaseConstants.usersCollection);
+  CollectionReference get _users =>
+      _firestore.collection(FirebaseConstants.usersCollection);
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
@@ -50,7 +45,8 @@ class AuthRepository {
         idToken: googleAuth?.idToken,
       );
 
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
 
       UserModel userModel;
 
@@ -76,35 +72,32 @@ class AuthRepository {
     }
   }
 
-  FutureEither<void> signUpWithEmail(String email, String password, String name) async {
+  FutureEither<void> signUpWithEmail(
+      String email, String password, String name) async {
     try {
-      // Kullanıcıyı e-posta ve şifre ile Firebase'e kaydet
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // E-posta doğrulama bağlantısını gönder
       await userCredential.user!.sendEmailVerification();
 
-      // Yeni kullanıcı için UserModel oluştur
       UserModel userModel = UserModel(
         name: name,
         profilePic: Constants.avatarDefault,
         banner: Constants.bannerDefault,
         uid: userCredential.user!.uid,
-        isAuthenticated: false, // Kullanıcı henüz doğrulanmadı
+        isAuthenticated: false,
         balance: 0,
         awards: [],
       );
 
-      // Kullanıcı verilerini Firestore'a kaydet
       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
 
-      // Kullanıcının oturumunu kapat
       await _auth.signOut();
 
-      return right(null); // Başarılı
+      return right(null);
     } on FirebaseAuthException catch (e) {
       return left(Failure(e.message ?? 'Bir hata oluştu'));
     } catch (e) {
@@ -112,7 +105,6 @@ class AuthRepository {
     }
   }
 
-// filepath: /Applications/GitHub Projects/hizmetim/lib/features/auth/repository/auth_repository.dart
   FutureEither<UserModel> signInWithEmail(String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
@@ -128,10 +120,6 @@ class AuthRepository {
           'isAuthenticated': true,
         });
 
-        // Notify listeners or update authentication state here
-        // For example:
-        // authProvider.updateAuthState(true);
-
         UserModel userModel = await getUserData(user.uid).first;
         return right(userModel);
       } else {
@@ -145,10 +133,9 @@ class AuthRepository {
     }
   }
 
-  /// `getUserData`, belirli bir kullanıcı kimliğine sahip kullanıcının verilerini alır.
-  /// Kullanıcı verilerini bir akış olarak döner.
   Stream<UserModel> getUserData(String uid) {
-    return _users.doc(uid).snapshots().map((event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
+    return _users.doc(uid).snapshots().map(
+        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
   }
 
   void logOut() async {

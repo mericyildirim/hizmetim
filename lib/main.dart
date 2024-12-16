@@ -5,19 +5,8 @@ import 'package:hizmetim/features/auth/controller/auth_controller.dart';
 import 'package:hizmetim/features/auth/screens/signup_screen.dart';
 import 'package:hizmetim/features/home/screens/home_screen.dart';
 import 'package:hizmetim/firebase_options.dart';
-import 'package:hizmetim/models/user_model.dart';
-import 'package:hizmetim/router.dart';
 import 'package:hizmetim/theme/palette.dart';
-import 'package:routemaster/routemaster.dart';
 
-final isLoggedInProvider = StateProvider<bool>((ref) {
-  var user = ref.watch(userProvider);
-  if (user != null) {
-    return true;
-  } else {
-    return false;
-  }
-});
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -38,13 +27,15 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> {
-  UserModel? userModel;
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(authControllerProvider.notifier).loginWithSecureStorage(context);
+      if (mounted) {
+        ref
+            .read(authControllerProvider.notifier)
+            .loginWithSecureStorage(context);
+      }
     });
   }
 
@@ -52,9 +43,19 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     bool isLoggedIn = ref.watch(isLoggedInProvider);
 
-    return MaterialApp(debugShowCheckedModeBanner: false, title: 'Hizmetim', theme: Pallete.lightModeAppTheme, home: isLoggedIn ? const HomeScreen() : const SignupScreen());
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Hizmetim',
+        theme: Pallete.lightModeAppTheme,
+        home: isLoggedIn ? const HomeScreen() : const SignupScreen());
   }
 }
 
-List<Widget> route1 = [];
-List<Widget> route2 = [];
+final isLoggedInProvider = StateProvider<bool>((ref) {
+  var user = ref.watch(userProvider);
+  if (user != null) {
+    return true;
+  } else {
+    return false;
+  }
+});

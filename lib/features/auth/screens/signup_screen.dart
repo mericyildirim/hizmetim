@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/common/auth_gradient_button.dart';
@@ -8,6 +6,8 @@ import 'package:hizmetim/core/common/loader.dart';
 import 'package:hizmetim/core/common/sign_in_google_button.dart';
 import 'package:hizmetim/core/constants/constants.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
+import 'package:hizmetim/features/auth/screens/login_screen.dart';
+import 'package:hizmetim/navigate_methods.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
@@ -31,7 +31,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   void signUpUser(String email, String password, String name) {
-    ref.read(authControllerProvider.notifier).signUpWithEmail(context, email, password, name);
+    ref
+        .read(authControllerProvider.notifier)
+        .signUpWithEmail(context, email, password, name);
   }
 
   @override
@@ -73,25 +75,35 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    CustomField(hintText: 'Name', controller: nameController, isObscureText: false),
+                    CustomField(
+                        hintText: 'Name',
+                        controller: nameController,
+                        isObscureText: false),
                     const SizedBox(height: 15),
-                    CustomField(hintText: 'E-mail', controller: emailController),
+                    CustomField(
+                        hintText: 'E-mail', controller: emailController),
                     const SizedBox(height: 15),
-                    CustomField(hintText: 'Password', controller: passwordController, isObscureText: true),
+                    CustomField(
+                        hintText: 'Password',
+                        controller: passwordController,
+                        isObscureText: true),
                     const SizedBox(height: 15),
                     AuthGradientButton(
                       buttonText: 'Sign Up',
                       onTap: () {
                         // Form doğrulama
                         if (formKey.currentState!.validate()) {
-                          signUpUser(emailController.text.trim(), passwordController.text.trim(), nameController.text.trim());
+                          signUpUser(
+                              emailController.text.trim(),
+                              passwordController.text.trim(),
+                              nameController.text.trim());
                         }
                       },
                     ),
                     const SizedBox(height: 15),
                     TextButton(
                       onPressed: () {
-                        
+                        NavigationMethod.navigate(context, const LoginScreen());
                       },
                       child: const Text('Already have an account? Sign In'),
                     ),

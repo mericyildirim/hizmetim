@@ -14,7 +14,7 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(userProvider)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text(user.name),
+        title: Text(user.balance.toString()),
       ),
       body: Center(
         child: ElevatedButton(

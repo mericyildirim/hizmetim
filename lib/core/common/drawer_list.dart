@@ -6,6 +6,6 @@ class DrawerList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Drawer();
+    return const Drawer();
   }
 }

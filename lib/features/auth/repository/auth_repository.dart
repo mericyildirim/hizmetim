@@ -73,7 +73,7 @@ class AuthRepository {
     }
   }
 
-  FutureEither<UserModel> signUpWithEmailAndPassword(
+  FutureEither<void> signUpWithEmailAndPassword(
       String email, String password, String name) async {
     try {
       UserCredential userCredential =
@@ -81,6 +81,8 @@ class AuthRepository {
         email: email,
         password: password,
       );
+
+      await userCredential.user!.sendEmailVerification();
 
       UserModel userModel = UserModel(
         uid: userCredential.user!.uid,
@@ -93,16 +95,13 @@ class AuthRepository {
         balance: 0,
       );
 
-      // Kullanıcı kaydedildi, e-posta doğrulama yapılmadıysa, doğrulama e-postası gönderiyoruz
-      if (!userCredential.user!.emailVerified) {
-        await userCredential.user!.sendEmailVerification();
-      }
-
       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
 
-      return right(userModel);
+      await _auth.signOut();
+
+      return right(null);
     } on FirebaseAuthException catch (e) {
-      return left(Failure(e.message!));
+      return left(Failure(e.message ?? 'Bir hata oluştu'));
     } catch (e) {
       return left(Failure(e.toString()));
     }
@@ -112,16 +111,26 @@ class AuthRepository {
       String email, String password) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: email, password: password);
+        email: email,
+        password: password,
+      );
 
-      if (!userCredential.user!.emailVerified) {
-        return left(Failure("Lütfen e-posta adresinizi doğrulayın."));
+      User user = userCredential.user!;
+      await user.reload();
+
+      if (user.emailVerified) {
+        await _users.doc(user.uid).update({
+          'isAuthenticated': true,
+        });
+
+        UserModel userModel = await getUserData(user.uid).first;
+        return right(userModel);
+      } else {
+        await _auth.signOut();
+        return left(Failure('Lütfen e-posta adresinizi doğrulayın.'));
       }
-
-      UserModel userModel = await getUserData(userCredential.user!.uid).first;
-      return right(userModel);
     } on FirebaseAuthException catch (e) {
-      return left(Failure(e.message!));
+      return left(Failure(e.message ?? 'Bir hata oluştu'));
     } catch (e) {
       return left(Failure(e.toString()));
     }

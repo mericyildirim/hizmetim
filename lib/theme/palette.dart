@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 class Pallete {
-  // Colors
-  static const blackColor = Color.fromRGBO(1, 1, 1, 1); // primary color
-  static const greyColor = Color.fromRGBO(26, 39, 45, 1); // secondary color
+  static const blackColor = Color.fromRGBO(1, 1, 1, 1);
+  static const greyColor = Color.fromRGBO(26, 39, 45, 1);
   static const drawerColor = Color.fromRGBO(18, 18, 18, 1);
   static const whiteColor = Colors.white;
   static const Color gradient1 = Color.fromRGBO(187, 63, 221, 1);
@@ -11,7 +10,6 @@ class Pallete {
   static var redColor = Colors.red.shade500;
   static var blueColor = Colors.blue.shade300;
 
-  // Themes
   static var darkModeAppTheme = ThemeData.dark().copyWith(
     scaffoldBackgroundColor: blackColor,
     cardColor: greyColor,
@@ -26,8 +24,7 @@ class Pallete {
     ),
     primaryColor: redColor,
     colorScheme: ThemeData.dark().colorScheme.copyWith(
-          surface:
-              drawerColor, // alternatif arka plan rengi olarak kullanılacak
+          surface: drawerColor,
         ),
     inputDecorationTheme: InputDecorationTheme(
       contentPadding: const EdgeInsets.all(27),

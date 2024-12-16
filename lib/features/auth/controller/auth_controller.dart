@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/utils.dart';
 import 'package:hizmetim/features/auth/repository/auth_repository.dart';
+import 'package:hizmetim/features/auth/repository/secure_storage_service.dart';
+import 'package:hizmetim/features/auth/screens/login_screen.dart';
 import 'package:hizmetim/models/user_model.dart';
+import 'package:hizmetim/navigate_methods.dart';
 
 final userProvider = StateProvider<UserModel?>((ref) => null);
 
@@ -16,11 +19,6 @@ final authControllerProvider =
 final authStateChangesProvider = StreamProvider<User?>((ref) {
   final authController = ref.watch(authControllerProvider.notifier);
   return authController.authStateChanges;
-});
-
-final getUserDataProvider = FutureProvider.family((ref, String uid) {
-  final authController = ref.watch(authControllerProvider.notifier);
-  return authController.getUserData(uid);
 });
 
 class AuthController extends StateNotifier<bool> {
@@ -50,11 +48,22 @@ class AuthController extends StateNotifier<bool> {
     final result =
         await _authRepository.signUpWithEmailAndPassword(email, password, name);
     state = false;
+
     result.fold(
-      (l) => showSnackBar(context, l.message),
-      (r) {
-        showSnackBar(context,
-            'Kayıt başarılı! Lütfen giriş yapın ve e-posta doğrulamanızı tamamlayın.');
+      (failure) {
+        if (mounted) {
+          showSnackBar(context, failure.message);
+        }
+      },
+      (_) {
+        if (mounted) {
+          showSnackBar(
+            context,
+            'E-posta adresinize doğrulama kodu gönderilmiştir. Lütfen e-postanızı kontrol ediniz.',
+          );
+
+          NavigationMethod.navigate(context, const LoginScreen());
+        }
       },
     );
   }
@@ -62,20 +71,39 @@ class AuthController extends StateNotifier<bool> {
   void signInWithEmailAndPassword(
       BuildContext context, String email, String password) async {
     state = true;
-    final result =
+    final user =
         await _authRepository.signInWithEmailAndPassword(email, password);
     state = false;
-    result.fold(
-      (l) => showSnackBar(context, l.message),
+
+    user.fold(
+      (failure) {
+        if (mounted) {
+          showSnackBar(context, failure.message);
+        }
+      },
       (userModel) {
-        if (userModel.isAuthenticated == false) {
-          showSnackBar(context,
-              'E-posta doğrulamanızı yapmadınız. Lütfen e-posta adresinizi doğrulayın.');
-        } else {
-          _ref.read(userProvider.notifier).update((state) => userModel);
+        if (mounted) {
+          if (userModel.isAuthenticated) {
+            _ref.read(userProvider.notifier).state = userModel;
+            var secureStorageService = _ref.read(secureStorageProvider);
+            secureStorageService.mailKaydet(email);
+            secureStorageService.passwordKaydet(password);
+          } else {
+            showSnackBar(context, 'Lütfen e-posta adresinizi doğrulayın.');
+          }
         }
       },
     );
+  }
+
+  Future<void> loginWithSecureStorage(BuildContext context) async {
+    var secureStorageService = _ref.read(secureStorageProvider);
+
+    String? email = await secureStorageService.mailGetir();
+    String? password = await secureStorageService.passwordGetir();
+    if (email != null && password != null) {
+      signInWithEmailAndPassword(context, email, password);
+    }
   }
 
   Stream<UserModel> getUserData(String uid) {
@@ -84,5 +112,9 @@ class AuthController extends StateNotifier<bool> {
 
   void logout() {
     _authRepository.logOut();
+    var secureStorageService = _ref.read(secureStorageProvider);
+    secureStorageService.mailKaydet(null);
+    secureStorageService.passwordKaydet(null);
+    _ref.read(userProvider.notifier).state = null;
   }
 }

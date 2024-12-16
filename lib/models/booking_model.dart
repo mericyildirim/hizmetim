@@ -1,16 +1,12 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
 class LessonBooking {
   final String id;
   final String studentId;
-  final String lessonId; // Ders ilanı ID'si
-  final String teacherId; // Öğretmen ID'si
-  final DateTime
-      bookingTime; // Rezervasyon zamanını daha iyi yönetebilmek için DateTime kullanıyoruz
-  final String status; // "pending", "confirmed", "completed", "canceled"
-  final DateTime? lessonTime; // Dersin yapılacağı zaman (null olabilir)
-  final String?
-      lessonFeedback; // Öğrencinin dersi bitirdikten sonra vereceği geribildirim (isteğe bağlı)
+  final String lessonId;
+  final String teacherId;
+  final DateTime bookingTime;
+  final String status;
+  final DateTime? lessonTime;
+  final String? lessonFeedback;
   LessonBooking({
     required this.id,
     required this.studentId,

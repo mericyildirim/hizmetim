@@ -6,7 +6,8 @@ import 'package:hizmetim/core/common/loader.dart';
 import 'package:hizmetim/core/common/sign_in_google_button.dart';
 import 'package:hizmetim/core/constants/constants.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
-import 'package:routemaster/routemaster.dart';
+import 'package:hizmetim/features/auth/screens/signup_screen.dart';
+import 'package:hizmetim/navigate_methods.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -92,7 +93,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     TextButton(
                       onPressed: () {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          Routemaster.of(context).push('/signup');
+                          NavigationMethod.navigate(
+                              context, const SignupScreen());
                         });
                       },
                       child: const Text('Already have an account? Sign Up'),

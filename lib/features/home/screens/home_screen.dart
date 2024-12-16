@@ -42,7 +42,7 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
-      drawer: DrawerList(),
+      drawer: const DrawerList(),
       body: Center(
         child: ElevatedButton(
             onPressed: () {

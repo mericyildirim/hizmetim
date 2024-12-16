@@ -52,13 +52,14 @@ class AuthRepository {
 
       if (userCredential.additionalUserInfo!.isNewUser) {
         userModel = UserModel(
-          name: userCredential.user!.displayName ?? 'No Name',
-          profilePic: userCredential.user!.photoURL ?? Constants.avatarDefault,
-          banner: Constants.bannerDefault,
           uid: userCredential.user!.uid,
+          name: userCredential.user!.displayName ?? 'No Name',
+          email: userCredential.user!.email ?? 'No Email',
+          userType: 'user',
           isAuthenticated: true,
+          profilePic: userCredential.user!.photoURL ?? Constants.avatarDefault,
+          bio: 'Kendinden Bahset!',
           balance: 0,
-          awards: [],
         );
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
       } else {
@@ -75,18 +76,30 @@ class AuthRepository {
   FutureEither<UserModel> signUpWithEmailAndPassword(
       String email, String password, String name) async {
     try {
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
-      UserModel userModel = UserModel(
-        name: name,
-        profilePic: userCredential.user!.photoURL ?? Constants.avatarDefault,
-        banner: Constants.bannerDefault,
-        uid: userCredential.user!.uid,
-        isAuthenticated: true,
-        balance: 0,
-        awards: [],
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
+
+      UserModel userModel = UserModel(
+        uid: userCredential.user!.uid,
+        name: name,
+        email: userCredential.user!.email ?? 'No Email',
+        userType: 'user',
+        isAuthenticated: true,
+        profilePic: userCredential.user!.photoURL ?? Constants.avatarDefault,
+        bio: 'Kendinden Bahset!',
+        balance: 0,
+      );
+
+      // Kullanıcı kaydedildi, e-posta doğrulama yapılmadıysa, doğrulama e-postası gönderiyoruz
+      if (!userCredential.user!.emailVerified) {
+        await userCredential.user!.sendEmailVerification();
+      }
+
       await _users.doc(userCredential.user!.uid).set(userModel.toMap());
+
       return right(userModel);
     } on FirebaseAuthException catch (e) {
       return left(Failure(e.message!));
@@ -100,6 +113,11 @@ class AuthRepository {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
+
+      if (!userCredential.user!.emailVerified) {
+        return left(Failure("Lütfen e-posta adresinizi doğrulayın."));
+      }
+
       UserModel userModel = await getUserData(userCredential.user!.uid).first;
       return right(userModel);
     } on FirebaseAuthException catch (e) {

@@ -47,26 +47,34 @@ class AuthController extends StateNotifier<bool> {
   void signUpWithEmailAndPassword(
       BuildContext context, String email, String password, String name) async {
     state = true;
-    final user =
+    final result =
         await _authRepository.signUpWithEmailAndPassword(email, password, name);
     state = false;
-    user.fold(
+    result.fold(
       (l) => showSnackBar(context, l.message),
-      (userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
+      (r) {
+        showSnackBar(context,
+            'Kayıt başarılı! Lütfen giriş yapın ve e-posta doğrulamanızı tamamlayın.');
+      },
     );
   }
 
   void signInWithEmailAndPassword(
       BuildContext context, String email, String password) async {
     state = true;
-    final user =
+    final result =
         await _authRepository.signInWithEmailAndPassword(email, password);
     state = false;
-    user.fold(
+    result.fold(
       (l) => showSnackBar(context, l.message),
-      (userModel) =>
-          _ref.read(userProvider.notifier).update((state) => userModel),
+      (userModel) {
+        if (userModel.isAuthenticated == false) {
+          showSnackBar(context,
+              'E-posta doğrulamanızı yapmadınız. Lütfen e-posta adresinizi doğrulayın.');
+        } else {
+          _ref.read(userProvider.notifier).update((state) => userModel);
+        }
+      },
     );
   }
 

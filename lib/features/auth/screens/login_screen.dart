@@ -91,7 +91,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 15),
                     TextButton(
                       onPressed: () {
-                        Routemaster.of(context).push('/signup');
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          Routemaster.of(context).push('/signup');
+                        });
                       },
                       child: const Text('Already have an account? Sign Up'),
                     ),

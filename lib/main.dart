@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/common/error_text.dart';
 import 'package:hizmetim/core/common/loader.dart';
@@ -14,10 +15,11 @@ import 'package:hizmetim/theme/palette.dart';
 import 'package:routemaster/routemaster.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -35,8 +37,9 @@ class MyApp extends ConsumerStatefulWidget {
 class _MyAppState extends ConsumerState<MyApp> {
   UserModel? userModel;
   late Future<void> userFuture;
+  bool isSplashScreenVisible = true;
+  final appTheme = Pallete.darkModeAppTheme;
 
-  // Kullanıcı verisini almak için async fonksiyon
   Future<void> getData(WidgetRef ref, User? data) async {
     if (data != null && userModel == null) {
       userModel = await ref
@@ -49,26 +52,29 @@ class _MyAppState extends ConsumerState<MyApp> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    initialization();
+  }
+
+  void initialization() async {
+    await Future.delayed(const Duration(seconds: 2));
+    FlutterNativeSplash.remove();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ref.watch(authStateChangesProvider).when(
           data: (data) {
-            // Eğer data null değilse veriyi al
             if (userModel == null) {
-              userFuture =
-                  getData(ref, data); // data burada nullable User? olabilir
+              userFuture = getData(ref, data);
             } else {
-              // userModel varsa, userFuture'ı geçerli yap
               userFuture = Future.value();
             }
 
             return FutureBuilder<void>(
               future: userFuture,
               builder: (context, snapshot) {
-                // Eğer veri alınıyor veya hata varsa bir bekleme durumu göster
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Loader();
-                }
-
                 if (snapshot.hasError) {
                   return ErrorText(error: snapshot.error.toString());
                 }
@@ -76,7 +82,7 @@ class _MyAppState extends ConsumerState<MyApp> {
                 return MaterialApp.router(
                   debugShowCheckedModeBanner: false,
                   title: 'Hizmetim',
-                  theme: Pallete.lightModeAppTheme,
+                  theme: appTheme,
                   routerDelegate: RoutemasterDelegate(
                     routesBuilder: (context) {
                       if (data != null) {

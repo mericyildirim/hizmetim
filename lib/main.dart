@@ -42,12 +42,22 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   Widget build(BuildContext context) {
     bool isLoggedIn = ref.watch(isLoggedInProvider);
+    final isLoading = ref.watch(authControllerProvider);
 
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Hizmetim',
-        theme: Pallete.lightModeAppTheme,
-        home: isLoggedIn ? const HomeScreen() : const LoginScreen());
+      debugShowCheckedModeBanner: false,
+      title: 'Hizmetim',
+      theme: Pallete.lightModeAppTheme,
+      home: isLoading
+          ? const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(), // Global loading ekranı
+              ),
+            )
+          : isLoggedIn
+              ? const HomeScreen() // Kullanıcı giriş yaptıysa
+              : const LoginScreen(),
+    ); // Giriş yapılmadıysa);
   }
 }
 

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/utils.dart';
@@ -16,11 +15,6 @@ final authControllerProvider =
           ref: ref,
         ));
 
-final authStateChangesProvider = StreamProvider<User?>((ref) {
-  final authController = ref.watch(authControllerProvider.notifier);
-  return authController.authStateChanges;
-});
-
 class AuthController extends StateNotifier<bool> {
   final AuthRepository _authRepository;
   final Ref _ref;
@@ -29,8 +23,6 @@ class AuthController extends StateNotifier<bool> {
       : _authRepository = authRepository,
         _ref = ref,
         super(false);
-
-  Stream<User?> get authStateChanges => _authRepository.authStateChanges;
 
   void signInWithGoogle(BuildContext context) async {
     state = true;
@@ -102,12 +94,9 @@ class AuthController extends StateNotifier<bool> {
     String? email = await secureStorageService.mailGetir();
     String? password = await secureStorageService.passwordGetir();
     if (email != null && password != null) {
+      // ignore: use_build_context_synchronously
       signInWithEmailAndPassword(context, email, password);
     }
-  }
-
-  Stream<UserModel> getUserData(String uid) {
-    return _authRepository.getUserData(uid);
   }
 
   void logout() {

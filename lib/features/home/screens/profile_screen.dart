@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hizmetim/core/constants/constants.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -20,10 +21,10 @@ class ProfileScreen extends ConsumerWidget {
             Center(
               child: Column(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 50,
-                    backgroundImage:
-                        NetworkImage('https://via.placeholder.com/150'),
+                    backgroundImage: NetworkImage(
+                        user.profilePic ?? Constants.avatarDefault),
                   ),
                   const SizedBox(height: 10),
                   Text(

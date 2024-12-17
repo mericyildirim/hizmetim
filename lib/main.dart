@@ -2,9 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
-import 'package:hizmetim/features/auth/screens/login_screen.dart';
-import 'package:hizmetim/features/home/screens/home_screen.dart';
+
 import 'package:hizmetim/firebase_options.dart';
+import 'package:hizmetim/home_main_screen.dart';
 import 'package:hizmetim/theme/palette.dart';
 
 void main() async {
@@ -28,36 +28,12 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref
-            .read(authControllerProvider.notifier)
-            .loginWithSecureStorage(context);
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    bool isLoggedIn = ref.watch(isLoggedInProvider);
-    final isLoading = ref.watch(authControllerProvider);
-
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Hizmetim',
-      theme: Pallete.lightModeAppTheme,
-      home: isLoading
-          ? const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(), // Global loading ekranı
-              ),
-            )
-          : isLoggedIn
-              ? const HomeScreen() // Kullanıcı giriş yaptıysa
-              : const LoginScreen(),
-    ); // Giriş yapılmadıysa);
+        debugShowCheckedModeBanner: false,
+        title: 'Hizmetim',
+        theme: Pallete.lightModeAppTheme,
+        home: const HomeMainScreen());
   }
 }
 

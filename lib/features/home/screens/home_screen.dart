@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/common/drawer_list.dart';
 import 'package:hizmetim/features/auth/controller/auth_controller.dart';
+import 'package:hizmetim/models/user_model.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  void logout(WidgetRef ref) {
+  void logOut(WidgetRef ref) {
     ref.read(authControllerProvider.notifier).logout();
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider)!;
+    UserModel user = ref.watch(userProvider)!;
 
     // Örnek kategoriler
     final categories = ['Matematik', 'Fen', 'İngilizce', 'Tarih', 'Müzik'];
@@ -148,7 +149,7 @@ class HomeScreen extends ConsumerWidget {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  logout(ref);
+                  logOut(ref);
                 },
                 child: const Text('Çıkış Yap'),
               ),

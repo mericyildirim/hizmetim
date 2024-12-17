@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hizmetim/core/utils.dart';
@@ -53,20 +55,18 @@ class AuthController extends StateNotifier<bool> {
             context,
             'E-posta adresinize doğrulama kodu gönderilmiştir. Lütfen e-postanızı kontrol ediniz.',
           );
-
           NavigationMethod.navigate(context, const LoginScreen());
         }
       },
     );
   }
 
-  void signInWithEmailAndPassword(
+  Future<void> signInWithEmailAndPassword(
       BuildContext context, String email, String password) async {
     state = true;
     final user =
         await _authRepository.signInWithEmailAndPassword(email, password);
     state = false;
-
     user.fold(
       (failure) {
         if (mounted) {
@@ -75,11 +75,13 @@ class AuthController extends StateNotifier<bool> {
       },
       (userModel) {
         if (mounted) {
-          if (userModel.isAuthenticated) {
+          if (userModel.isAuthenticated == true) {
             _ref.read(userProvider.notifier).state = userModel;
             var secureStorageService = _ref.read(secureStorageProvider);
             secureStorageService.mailKaydet(email);
             secureStorageService.passwordKaydet(password);
+            log('Giriş Başarılı');
+            NavigationMethod.goHome(context);
           } else {
             showSnackBar(context, 'Lütfen e-posta adresinizi doğrulayın.');
           }
@@ -95,7 +97,7 @@ class AuthController extends StateNotifier<bool> {
     String? password = await secureStorageService.passwordGetir();
     if (email != null && password != null) {
       // ignore: use_build_context_synchronously
-      signInWithEmailAndPassword(context, email, password);
+      await signInWithEmailAndPassword(context, email, password);
     }
   }
 

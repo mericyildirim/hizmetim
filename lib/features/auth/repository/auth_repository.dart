@@ -61,7 +61,7 @@ class AuthRepository {
         );
         await _users.doc(userCredential.user!.uid).set(userModel.toMap());
       } else {
-        userModel = await getUserData(userCredential.user!.uid).first;
+        userModel = await getUserData(userCredential.user!.uid);
       }
       return right(userModel);
     } on FirebaseException catch (e) {
@@ -87,7 +87,7 @@ class AuthRepository {
         name: name,
         email: userCredential.user!.email ?? 'No Email',
         userType: 'user',
-        isAuthenticated: true,
+        isAuthenticated: false,
         profilePic: userCredential.user!.photoURL ?? Constants.avatarDefault,
         bio: 'Kendinden Bahset!',
         balance: 0,
@@ -114,29 +114,32 @@ class AuthRepository {
       );
 
       User user = userCredential.user!;
+
       await user.reload();
+      user = _auth.currentUser!;
 
       if (user.emailVerified) {
         await _users.doc(user.uid).update({
           'isAuthenticated': true,
         });
 
-        UserModel userModel = await getUserData(user.uid).first;
+        UserModel userModel = await getUserData(user.uid);
         return right(userModel);
       } else {
         await _auth.signOut();
-        return left(Failure('Lütfen e-posta adresinizi doğrulayın.'));
+        return left(Failure(
+            'E-posta adresinizi doğrulamadınız. Lütfen doğrulayıp tekrar deneyin.'));
       }
     } on FirebaseAuthException catch (e) {
-      return left(Failure(e.message ?? 'Bir hata oluştu'));
+      return left(Failure(e.message ?? 'Bir hata oluştu.'));
     } catch (e) {
       return left(Failure(e.toString()));
     }
   }
 
-  Stream<UserModel> getUserData(String uid) {
-    return _users.doc(uid).snapshots().map(
-        (event) => UserModel.fromMap(event.data() as Map<String, dynamic>));
+  Future<UserModel> getUserData(String uid) async {
+    DocumentSnapshot doc = await _users.doc(uid).get();
+    return UserModel.fromMap(doc.data() as Map<String, dynamic>);
   }
 
   void logOut() async {

@@ -27,6 +27,7 @@ class _HomeMainScreenState extends ConsumerState<HomeMainScreen> {
   Widget build(BuildContext context) {
     bool isLoggedIn = ref.watch(isLoggedInProvider);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: FutureBuilder(
         future: _initApp,
         builder: (BuildContext context, AsyncSnapshot snapshot) {

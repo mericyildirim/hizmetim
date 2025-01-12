@@ -14,7 +14,7 @@ class SettingsScreen extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.dark_mode),
             title: Text('Tema Değiştir'),
-            trailing: Icon(Icons.arrow_forward_ios),
+            trailing: Switch(value: true, onChanged: null),
           ),
           Divider(),
           ListTile(

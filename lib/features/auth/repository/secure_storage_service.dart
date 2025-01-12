@@ -8,14 +8,14 @@ final secureStorageProvider = Provider((ref) {
 class SecureStorageService {
   final FlutterSecureStorage preferences = const FlutterSecureStorage();
 
-  void mailKaydet(String? phoneNumber) async {
-    await preferences.write(key: 'mail', value: phoneNumber);
+  void mailKaydet(String? mail) async {
+    await preferences.write(key: 'mail', value: mail);
   }
 
   Future<String?> mailGetir() async {
-    var number = await preferences.read(key: 'mail');
+    var mailAdi = await preferences.read(key: 'mail');
 
-    return number;
+    return mailAdi;
   }
 
   void passwordKaydet(String? password) async {

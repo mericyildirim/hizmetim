@@ -45,18 +45,14 @@ class AuthController extends StateNotifier<bool> {
 
     result.fold(
       (failure) {
-        if (mounted) {
-          showSnackBar(context, failure.message);
-        }
+        showSnackBar(context, failure.message);
       },
       (_) {
-        if (mounted) {
-          showSnackBar(
-            context,
-            'E-posta adresinize doğrulama kodu gönderilmiştir. Lütfen e-postanızı kontrol ediniz.',
-          );
-          NavigationMethod.navigate(context, const LoginScreen());
-        }
+        showSnackBar(
+          context,
+          'E-posta adresinize doğrulama kodu gönderilmiştir. Lütfen e-postanızı kontrol ediniz.',
+        );
+        NavigationMethod.navigate(context, const LoginScreen());
       },
     );
   }
@@ -69,22 +65,18 @@ class AuthController extends StateNotifier<bool> {
     state = false;
     user.fold(
       (failure) {
-        if (mounted) {
-          showSnackBar(context, failure.message);
-        }
+        showSnackBar(context, failure.message);
       },
       (userModel) {
-        if (mounted) {
-          if (userModel.isAuthenticated == true) {
-            _ref.read(userProvider.notifier).state = userModel;
-            var secureStorageService = _ref.read(secureStorageProvider);
-            secureStorageService.mailKaydet(email);
-            secureStorageService.passwordKaydet(password);
-            log('Giriş Başarılı');
-            NavigationMethod.goHome(context);
-          } else {
-            showSnackBar(context, 'Lütfen e-posta adresinizi doğrulayın.');
-          }
+        if (userModel.isAuthenticated == true) {
+          _ref.read(userProvider.notifier).state = userModel;
+          var secureStorageService = _ref.read(secureStorageProvider);
+          secureStorageService.mailKaydet(email);
+          secureStorageService.passwordKaydet(password);
+          log('Giriş Başarılı');
+          NavigationMethod.goHome(context);
+        } else {
+          showSnackBar(context, 'Lütfen e-posta adresinizi doğrulayın.');
         }
       },
     );
